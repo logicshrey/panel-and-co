@@ -1,0 +1,16 @@
+{
+  "name": "panel-and-co",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Panel & Co. — MERN storefront (React + Vite client, Express + MongoDB server)",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "start:server": "npm start --prefix server",
+    "build:client": "npm run build --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

@@ -1,0 +1,154 @@
+@import "tailwindcss";
+
+@theme {
+  --color-aetherguard-primary: #0EA5E9;
+  --color-aetherguard-secondary: #FFFFFF;
+  --color-aetherguard-accent: #C0C0C0;
+
+  --color-ironclad-primary: #DC2626;
+  --color-ironclad-secondary: #1F2937;
+  --color-ironclad-accent: #000000;
+
+  --color-nightspire-primary: #581C87;
+  --color-nightspire-secondary: #FCD34D;
+  --color-nightspire-accent: #1E1B4B;
+
+  --color-ink-950: #0B0B0D;
+  --color-ink-900: #15151A;
+  --color-ink-800: #24242B;
+  --color-ink-100: #F4F0E6;
+  --color-brand-accent: #F6C515;
+  --color-brand-accent-dark: #C99400;
+
+  --font-poster: "Bebas Neue", sans-serif;
+  --font-caption: "Anton", sans-serif;
+  --font-body: "Inter", sans-serif;
+}
+
+body {
+  @apply font-body bg-ink-950 text-ink-100;
+}
+
+h1, h2, h3, .font-poster {
+  @apply font-poster tracking-wide;
+}
+
+h4, h5, h6, .font-caption {
+  @apply font-caption uppercase tracking-wide;
+}
+
+/* Reusable comic-panel frame for cards, forms, and content sections. */
+.panel {
+  border: 4px solid var(--color-ink-950);
+  box-shadow: 7px 7px 0 var(--color-ink-950);
+}
+
+.panel-diagonal {
+  clip-path: polygon(0 0, 94% 0, 100% 11%, 100% 100%, 6% 100%, 0 89%);
+}
+
+.caption-box {
+  display: inline-block;
+  background: var(--color-ink-950);
+  border: 2px solid var(--color-ink-100);
+  color: var(--color-ink-100);
+  font-family: var(--font-caption);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  padding: 0.45rem 0.65rem;
+  text-transform: uppercase;
+  transform: rotate(-1.5deg);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--color-ink-950);
+  background: var(--color-brand-accent);
+  box-shadow: 4px 4px 0 var(--color-ink-950);
+  clip-path: polygon(0 0, 94% 0, 100% 24%, 100% 100%, 6% 100%, 0 76%);
+  color: var(--color-ink-950);
+  cursor: pointer;
+  font-family: var(--font-caption);
+  letter-spacing: 0.06em;
+  padding: 0.7rem 1rem;
+  text-transform: uppercase;
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.btn-primary:hover {
+  background: var(--color-brand-accent-dark);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--color-ink-950);
+}
+
+.btn-primary:active {
+  transform: translate(4px, 4px) scale(0.98);
+  box-shadow: none;
+}
+
+.btn-primary:focus-visible {
+  outline: 3px solid var(--color-ink-100);
+  outline-offset: 3px;
+}
+
+/* Comic halftone dot texture, tinted per-faction via currentColor */
+.halftone {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.halftone::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(currentColor 1.4px, transparent 1.8px);
+  background-size: 8px 8px;
+  opacity: 0;
+  transform: scale(0.94);
+  transition: opacity 160ms ease, transform 160ms ease;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  z-index: 0;
+}
+.halftone:hover::before {
+  opacity: 0.42;
+  transform: scale(1);
+}
+
+/* Add this alongside halftone on interactive panels for an impact-burst corner. */
+.ink-hover {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.ink-hover::after {
+  content: "";
+  position: absolute;
+  right: -3rem;
+  top: -3rem;
+  width: 10rem;
+  height: 10rem;
+  background-image: radial-gradient(currentColor 2px, transparent 2.8px);
+  background-size: 11px 11px;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.35) rotate(-12deg);
+  transform-origin: top right;
+  transition: opacity 140ms ease, transform 180ms ease;
+  z-index: 0;
+}
+.ink-hover:hover::after {
+  opacity: 0.38;
+  transform: scale(1) rotate(0deg);
+}
+
+/* Poster hero backdrop: coarse halftone gradient */
+.halftone-hero {
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.12) 2.5px, transparent 2.8px),
+    radial-gradient(circle at 60% 70%, rgba(246,197,21,0.1) 2px, transparent 2.4px);
+  background-size: 26px 26px, 19px 19px;
+}
