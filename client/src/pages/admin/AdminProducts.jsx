@@ -20,6 +20,8 @@ function AdminProducts() {
   const [expandedId, setExpandedId] = useState(null)
   const [variantForm, setVariantForm] = useState(EMPTY_VARIANT)
   const [error, setError] = useState('')
+  const [externalUrl, setExternalUrl] = useState('')
+  const [uploadStates, setUploadStates] = useState([])
 
   async function loadProducts() {
     const { data } = await client.get('/admin/products')
@@ -35,6 +37,35 @@ function AdminProducts() {
     setProductForm((form) => ({ ...form, [field]: value }))
   }
 
+  function addExternalUrl() {
+    const url = externalUrl.trim()
+    if (!url) return
+    setProductForm((form) => ({ ...form, images: [...imageList(form.images), url].join('\n') }))
+    setExternalUrl('')
+  }
+
+  async function uploadImages(event) {
+    const files = Array.from(event.target.files || [])
+    if (!files.length) return
+
+    const initialStates = files.map((file) => ({ id: `${file.name}-${file.lastModified}`, name: file.name, status: 'Uploading…' }))
+    setUploadStates((current) => [...current, ...initialStates])
+
+    await Promise.all(files.map(async (file) => {
+      const id = `${file.name}-${file.lastModified}`
+      const formData = new FormData()
+      formData.append('image', file)
+      try {
+        const { data } = await client.post('/admin/upload', formData)
+        setProductForm((form) => ({ ...form, images: [...imageList(form.images), data.secure_url].join('\n') }))
+        setUploadStates((current) => current.map((upload) => upload.id === id ? { ...upload, status: 'Uploaded', url: data.secure_url } : upload))
+      } catch (requestError) {
+        setUploadStates((current) => current.map((upload) => upload.id === id ? { ...upload, status: requestError.response?.data?.message || 'Upload failed' } : upload))
+      }
+    }))
+    event.target.value = ''
+  }
+
   async function saveProduct(event) {
     event.preventDefault()
     setError('')
@@ -44,6 +75,8 @@ function AdminProducts() {
       else await client.post('/admin/products', payload)
       setProductForm(EMPTY_PRODUCT)
       setEditingId(null)
+      setExternalUrl('')
+      setUploadStates([])
       await loadProducts()
     } catch (requestError) {
       setError(requestError.response?.data?.message || 'Could not save product')
@@ -59,6 +92,8 @@ function AdminProducts() {
       basePrice: String(product.basePrice),
       images: product.images?.join('\n') || '',
     })
+    setExternalUrl('')
+    setUploadStates([])
   }
 
   async function removeProduct(id) {
@@ -105,8 +140,10 @@ function AdminProducts() {
             {factions.map((faction) => <option key={faction._id} value={faction._id}>{faction.name}</option>)}
           </select></label>
           <label className="text-sm">Base price<input className={`mt-1 ${INPUT_CLASS}`} type="number" min="0" value={productForm.basePrice} onChange={(event) => changeProduct('basePrice', event.target.value)} required /></label>
-          <label className="text-sm">Image URLs (one per line)<textarea className={`mt-1 min-h-20 ${INPUT_CLASS}`} value={productForm.images} onChange={(event) => changeProduct('images', event.target.value)} /></label>
+          <div className="text-sm"><span>Product images</span><input className="mt-1 block w-full cursor-pointer border border-ink-800 bg-ink-950 p-2 text-sm text-ink-100 file:mr-3 file:border-0 file:bg-brand-accent file:px-3 file:py-1 file:text-sm file:font-semibold file:text-ink-950" type="file" accept="image/*" multiple onChange={uploadImages} /><p className="mt-1 text-xs text-ink-100/55">Upload one or more images (max 10 MB each).</p></div>
+          <div className="text-sm"><label htmlFor="external-image-url">External image URL (optional)</label><div className="mt-1 flex gap-2"><input id="external-image-url" className={INPUT_CLASS} placeholder="https://..." value={externalUrl} onChange={(event) => setExternalUrl(event.target.value)} /><button className={SECONDARY_BUTTON} type="button" onClick={addExternalUrl}>Add URL</button></div></div>
         </div>
+        {(imageList(productForm.images).length > 0 || uploadStates.length > 0) && <div className="flex flex-wrap gap-3">{imageList(productForm.images).map((url) => <div className="w-20" key={url}><img className="h-20 w-20 border border-ink-800 object-cover" src={url} alt="Product upload preview" /></div>)}{uploadStates.filter((upload) => !upload.url).map((upload) => <p className="self-center text-xs text-ink-100/65" key={upload.id}>{upload.name}: {upload.status}</p>)}</div>}
         <label className="text-sm">Description<textarea className={`mt-1 min-h-24 ${INPUT_CLASS}`} value={productForm.description} onChange={(event) => changeProduct('description', event.target.value)} /></label>
         <div className="flex gap-2"><button className="bg-brand-accent px-3 py-2 text-sm font-semibold text-ink-950 hover:bg-brand-accent-dark" type="submit">{editingId ? 'Save product' : 'Add product'}</button>{editingId && <button className={SECONDARY_BUTTON} type="button" onClick={() => { setEditingId(null); setProductForm(EMPTY_PRODUCT) }}>Cancel</button>}</div>
       </form>

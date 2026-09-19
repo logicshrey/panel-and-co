@@ -220,7 +220,34 @@ h4, h5, h6, .font-caption {
   text-shadow: 0 0 14px rgba(246, 197, 21, 0.22), 0 2px 0 rgba(0, 0, 0, 0.55);
 }
 
+.auth-glow {
+  position: relative;
+  isolation: isolate;
+}
+
+.auth-glow::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -4rem;
+  background: radial-gradient(circle, rgba(246, 197, 21, 0.2), transparent 62%);
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.reveal-section {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 560ms ease, transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal-section.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cinematic-title { animation: none; }
   .panel, .btn-primary { transition: none; }
+  .reveal-section { opacity: 1; transform: none; transition: none; }
 }

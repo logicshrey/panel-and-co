@@ -19,6 +19,7 @@ import ShopTogetherStart from './pages/ShopTogetherStart'
 import ShopTogetherSession from './pages/ShopTogetherSession'
 import { useAuth } from './context/AuthContext'
 import AssistantChat from './components/AssistantChat'
+import Footer from './components/Footer'
 
 function App() {
   const { user, loading, logout } = useAuth()
@@ -68,6 +69,7 @@ function App() {
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <Footer />
       <AssistantChat />
     </div>
   )

@@ -3,8 +3,30 @@ const OrderItem = require('../models/OrderItem');
 const Product = require('../models/Product');
 const Variant = require('../models/Variant');
 const { sendOrderCancellationEmail } = require('../utils/sendEmail');
+const cloudinary = require('../utils/cloudinary');
 
 const ORDER_STATUSES = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'];
+
+async function uploadImage(req, res) {
+  if (!req.file) return res.status(400).json({ message: 'An image file is required' });
+  if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    return res.status(503).json({ message: 'Image uploads are not configured' });
+  }
+
+  try {
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: 'panel-and-co/products', resource_type: 'image' },
+        (error, uploadResult) => (error ? reject(error) : resolve(uploadResult)),
+      );
+      stream.end(req.file.buffer);
+    });
+    return res.status(201).json({ secure_url: result.secure_url });
+  } catch (error) {
+    console.error('Cloudinary upload failed:', error.message);
+    return res.status(502).json({ message: 'Image upload failed' });
+  }
+}
 
 async function getAdminProducts(_req, res) {
   try {
@@ -150,6 +172,7 @@ async function updateOrderStatus(req, res) {
 }
 
 module.exports = {
+  uploadImage,
   getAdminProducts,
   createProduct,
   updateProduct,

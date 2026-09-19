@@ -32,8 +32,10 @@ function OrderConfirmation() {
         ))}
       </ul>
       <p className="mt-4 font-semibold">Total: ₹{order.total}</p>
-      <Link className="mt-4 inline-block" to="/shop">Continue shopping</Link>
-      <Link className="ml-4 inline-block" to={`/orders/${order._id}`}>View order details</Link>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link className="border border-ink-800 bg-ink-900 px-4 py-3 text-sm font-semibold text-ink-100 hover:border-brand-accent hover:bg-ink-800" to="/shop">Continue shopping</Link>
+        <Link className="btn-primary" to={`/orders/${order._id}`}>View order details</Link>
+      </div>
     </main>
   )
 }

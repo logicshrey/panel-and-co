@@ -1,10 +1,13 @@
 const express = require('express');
 const { protect, adminOnly } = require('../middleware/auth');
 const controller = require('../controllers/adminController');
+const multer = require('multer');
 
 const router = express.Router();
 
 router.use(protect, adminOnly);
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+router.post('/upload', upload.single('image'), controller.uploadImage);
 router.get('/products', controller.getAdminProducts);
 router.post('/products', controller.createProduct);
 router.put('/products/:id', controller.updateProduct);

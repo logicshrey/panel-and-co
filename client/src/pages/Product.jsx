@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getProductById } from '../api/products'
 import { useCart } from '../context/CartContext'
-import ProductIllustration from '../components/ProductIllustration'
+import ProductMedia from '../components/ProductMedia'
 
 function Product() {
   const { id } = useParams()
@@ -69,10 +69,12 @@ function Product() {
 
       <div className="mt-5 grid gap-8 md:grid-cols-2">
         <div className="panel panel-diagonal bg-ink-900 p-3">
-          <ProductIllustration
+          <ProductMedia
+            imageUrl={product.images?.[0]}
             name={product.name}
             factionSlug={product.factionId?.slug}
             className="w-full"
+            imageClassName="aspect-square w-full object-cover"
           />
         </div>
 

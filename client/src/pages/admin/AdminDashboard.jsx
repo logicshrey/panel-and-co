@@ -17,6 +17,11 @@ import {
   getRevenue,
 } from '../../api/analytics'
 
+const TOOLTIP_STYLE = { backgroundColor: '#15151A', border: '1px solid #F6C515', borderRadius: '0', color: '#F4F0E6' }
+const TOOLTIP_LABEL_STYLE = { color: '#F4F0E6' }
+const TOOLTIP_ITEM_STYLE = { color: '#F4F0E6' }
+const CHART_CURSOR = { fill: 'rgba(246, 197, 21, 0.10)' }
+
 function stockClass(stock) {
   if (stock < 3) return 'font-semibold text-red-400'
   return 'font-semibold text-amber-300'
@@ -98,7 +103,7 @@ function AdminDashboard() {
                 <CartesianGrid stroke="#3A3A44" strokeDasharray="3 3" />
                 <XAxis dataKey="date" minTickGap={24} />
                 <YAxis />
-                <Tooltip />
+                <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} cursor={CHART_CURSOR} />
                 <Line type="monotone" dataKey="revenue" stroke="#F6C515" dot={false} />
               </LineChart>
             </ResponsiveContainer>
@@ -117,8 +122,8 @@ function AdminDashboard() {
                 <CartesianGrid stroke="#3A3A44" strokeDasharray="3 3" />
                 <XAxis dataKey="factionName" />
                 <YAxis />
-                <Tooltip />
-                <Bar dataKey="totalRevenue" fill="#F6C515" />
+                <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} cursor={CHART_CURSOR} />
+                <Bar dataKey="totalRevenue" fill="#F6C515" cursor={CHART_CURSOR} />
               </BarChart>
             </ResponsiveContainer>
           </div>
