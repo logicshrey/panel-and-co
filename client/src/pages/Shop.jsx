@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { getFactions } from '../api/factions'
 import { getProductFilters, getProducts } from '../api/products'
+import ProductIllustration from '../components/ProductIllustration'
 
 function toggleValue(params, key, value) {
   const next = new URLSearchParams(params)
@@ -134,13 +135,11 @@ function Shop() {
                   to={`/product/${product._id}`}
                   className="panel ink-hover group block bg-ink-900 p-3 transition-transform hover:-translate-y-1"
                 >
-                  {product.images?.[0] && (
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="relative z-10 aspect-square w-full object-cover"
-                    />
-                  )}
+                  <ProductIllustration
+                    name={product.name}
+                    factionSlug={product.factionId?.slug}
+                    className="relative z-10 aspect-square w-full"
+                  />
                   <p className="relative z-10 mt-3 text-sm text-ink-100/60">
                     {product.factionId?.name}
                   </p>

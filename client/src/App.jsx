@@ -7,6 +7,8 @@ import Register from './pages/Register'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import OrderConfirmation from './pages/OrderConfirmation'
+import OrderDetail from './pages/OrderDetail'
+import MyOrders from './pages/MyOrders'
 import AdminRoute from './components/AdminRoute'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -23,8 +25,8 @@ function App() {
 
   return (
     <div className="min-h-screen bg-ink-950 p-4">
-      <nav className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 border-b-2 border-ink-800 pb-4 text-sm text-ink-100/75">
-        <Link className="font-poster text-3xl tracking-wide text-ink-100" to="/">Panel &amp; Co.</Link>
+      <nav className="nav-cinematic mb-6 flex flex-wrap items-center gap-x-5 gap-y-2 pb-4 text-sm text-ink-100/75">
+        <Link className="wordmark-glow font-poster text-3xl tracking-wide text-ink-100" to="/">Panel &amp; Co.</Link>
         <Link className="hover:text-brand-accent" to="/shop">Shop</Link>
         <Link className="hover:text-brand-accent" to="/cart">Cart</Link>
         <Link className="hover:text-brand-accent" to="/shop-together">Shop Together</Link>
@@ -37,6 +39,7 @@ function App() {
         {!loading && user && (
           <>
             <span className="ml-auto text-ink-100">{user.name}</span>
+            <Link className="font-caption text-xs hover:text-brand-accent" to="/orders">My Orders</Link>
             {user.role === 'admin' && <Link className="font-caption text-xs text-brand-accent hover:text-ink-100" to="/admin">Admin</Link>}
             <button className="font-caption text-xs hover:text-brand-accent" type="button" onClick={logout}>Logout</button>
           </>
@@ -52,6 +55,8 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
+        <Route path="/orders" element={<MyOrders />} />
+        <Route path="/orders/:id" element={<OrderDetail />} />
         <Route path="/shop-together" element={<ShopTogetherStart />} />
         <Route path="/shop-together/:code" element={<ShopTogetherSession />} />
         <Route element={<AdminRoute />}>

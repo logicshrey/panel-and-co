@@ -7,6 +7,17 @@ import { endShopSession, getSession } from '../api/sessions'
 
 const INITIAL_ADDRESS = { line1: '', line2: '', city: '', state: '', pincode: '', phone: '' }
 
+function loadRazorpayCheckout() {
+  if (window.Razorpay) return Promise.resolve(true)
+  return new Promise((resolve) => {
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.onload = () => resolve(true)
+    script.onerror = () => resolve(false)
+    document.body.appendChild(script)
+  })
+}
+
 function Checkout() {
   const { user, loading } = useAuth()
   const { items, dispatch } = useCart()
@@ -15,6 +26,8 @@ function Checkout() {
   const [address, setAddress] = useState(INITIAL_ADDRESS)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState('COD')
+  const [pendingPayment, setPendingPayment] = useState(null)
   const sessionCode = new URLSearchParams(location.search).get('session')
   const [sharedState, setSharedState] = useState(null)
   const [sessionReady, setSessionReady] = useState(!sessionCode)
@@ -43,6 +56,35 @@ function Checkout() {
     setAddress((current) => ({ ...current, [field]: value }))
   }
 
+  async function openRazorpayCheckout(payment) {
+    const loaded = await loadRazorpayCheckout()
+    if (!loaded) throw new Error('Could not load Razorpay Checkout. Please try again.')
+
+    await new Promise((resolve, reject) => {
+      const checkout = new window.Razorpay({
+        key: payment.razorpayKeyId,
+        amount: payment.amount * 100,
+        currency: 'INR',
+        order_id: payment.razorpayOrderId,
+        name: 'Panel & Co.',
+        description: 'Order payment',
+        prefill: { email: user.email },
+        theme: { color: '#F6C515' },
+        handler: async (response) => {
+          try {
+            await client.post(`/orders/${payment.orderId}/verify-payment`, response)
+            resolve()
+          } catch (requestError) {
+            reject(new Error(requestError.response?.data?.message || 'Payment verification failed.'))
+          }
+        },
+        modal: { ondismiss: () => reject(new Error('Payment was cancelled. You can try again.')) },
+      })
+      checkout.on('payment.failed', (response) => reject(new Error(response.error?.description || 'Payment failed. You can try again.')))
+      checkout.open()
+    })
+  }
+
   async function handleSubmit(event) {
     event.preventDefault()
     const requiredFields = ['line1', 'city', 'state', 'pincode', 'phone']
@@ -58,11 +100,28 @@ function Checkout() {
     setError('')
     setSubmitting(true)
     try {
+      if (pendingPayment) {
+        await openRazorpayCheckout(pendingPayment)
+        if (sessionCode) await endShopSession(sessionCode)
+        else dispatch({ type: 'CLEAR_CART' })
+        navigate(`/order-confirmation/${pendingPayment.orderId}`)
+        return
+      }
       const { data } = await client.post('/orders', {
         items: checkoutItems.map((item) => ({ variantId: item.variantId, qty: item.qty })),
         address,
+        paymentMethod,
       })
-      await client.post(`/orders/${data.order._id}/confirm`)
+      if (paymentMethod !== 'COD') {
+        const payment = {
+          orderId: data.order._id,
+          razorpayOrderId: data.razorpayOrderId,
+          razorpayKeyId: data.razorpayKeyId,
+          amount: data.order.total,
+        }
+        setPendingPayment(payment)
+        await openRazorpayCheckout(payment)
+      }
       if (sessionCode) await endShopSession(sessionCode)
       else dispatch({ type: 'CLEAR_CART' })
       navigate(`/order-confirmation/${data.order._id}`)
@@ -90,8 +149,14 @@ function Checkout() {
               />
             </label>
           ))}
+          <fieldset className="border-t border-ink-800 pt-4">
+            <legend className="font-semibold">Payment method</legend>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              {[['COD', 'Cash on Delivery'], ['UPI', 'UPI'], ['CARD', 'Card']].map(([value, label]) => <label key={value} className={`cursor-pointer border p-3 text-sm ${paymentMethod === value ? 'border-brand-accent bg-brand-accent/10' : 'border-ink-800'}`}><input className="mr-2 accent-brand-accent" type="radio" name="paymentMethod" value={value} checked={paymentMethod === value} onChange={(event) => { setPaymentMethod(event.target.value); setPendingPayment(null) }} />{label}</label>)}
+            </div>
+          </fieldset>
           <button className="btn-primary disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={submitting || checkoutItems.length === 0}>
-            {submitting ? 'Processing…' : 'Pay Now'}
+            {submitting ? 'Processing…' : pendingPayment ? 'Resume payment' : paymentMethod === 'COD' ? 'Place COD order' : 'Pay Now'}
           </button>
         </form>
       </section>

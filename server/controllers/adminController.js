@@ -2,6 +2,7 @@ const Order = require('../models/Order');
 const OrderItem = require('../models/OrderItem');
 const Product = require('../models/Product');
 const Variant = require('../models/Variant');
+const { sendOrderCancellationEmail } = require('../utils/sendEmail');
 
 const ORDER_STATUSES = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'];
 
@@ -134,9 +135,14 @@ async function updateOrderStatus(req, res) {
     if (!ORDER_STATUSES.includes(status)) {
       return res.status(400).json({ message: 'Invalid order status' });
     }
-    const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true, runValidators: true })
-      .populate('userId', 'name email');
+    const order = await Order.findById(req.params.id).populate('userId', 'name email');
     if (!order) return res.status(404).json({ message: 'Order not found' });
+    const wasCancelled = order.status === 'cancelled';
+    order.status = status;
+    await order.save();
+    if (status === 'cancelled' && !wasCancelled) {
+      await sendOrderCancellationEmail({ order, user: order.userId });
+    }
     return res.json({ order });
   } catch (error) {
     return res.status(500).json({ message: error.message });

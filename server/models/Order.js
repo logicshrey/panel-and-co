@@ -12,6 +12,22 @@ const orderSchema = new mongoose.Schema({
     enum: ['pending', 'paid', 'shipped', 'delivered', 'cancelled'],
     default: 'pending',
   },
+  paymentMethod: {
+    type: String,
+    enum: ['COD', 'UPI', 'CARD'],
+    default: 'COD',
+  },
+  shippingAddress: {
+    line1: { type: String, default: '' },
+    line2: { type: String, default: '' },
+    city: { type: String, default: '' },
+    state: { type: String, default: '' },
+    pincode: { type: String, default: '' },
+    phone: { type: String, default: '' },
+  },
+  confirmationEmailSentAt: { type: Date, default: null },
+  razorpayOrderId: { type: String, default: null },
+  razorpayPaymentId: { type: String, default: null },
   createdAt: { type: Date, default: Date.now },
 });
 

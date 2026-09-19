@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getProductById } from '../api/products'
 import { useCart } from '../context/CartContext'
+import ProductIllustration from '../components/ProductIllustration'
 
 function Product() {
   const { id } = useParams()
@@ -68,14 +69,16 @@ function Product() {
 
       <div className="mt-5 grid gap-8 md:grid-cols-2">
         <div className="panel panel-diagonal bg-ink-900 p-3">
-        {product.images?.map((src) => (
-          <img className="w-full object-cover" key={src} src={src} alt={product.name} />
-        ))}
+          <ProductIllustration
+            name={product.name}
+            factionSlug={product.factionId?.slug}
+            className="w-full"
+          />
         </div>
 
         <section className="space-y-5">
           <span className="caption-box">{product.factionId?.name}</span>
-          <h1 className="font-poster text-5xl">{product.name}</h1>
+          <h1 className="title-glow font-poster text-5xl">{product.name}</h1>
           <p className="text-ink-100/75">{product.description}</p>
           <p className="font-caption text-2xl text-brand-accent">₹{product.basePrice}</p>
 
