@@ -251,3 +251,26 @@ h4, h5, h6, .font-caption {
   .panel, .btn-primary { transition: none; }
   .reveal-section { opacity: 1; transform: none; transition: none; }
 }
+
+/* ===== Mobile responsiveness fixes ===== */
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .panel-diagonal {
+    clip-path: none;
+  }
+  .caption-box {
+    transform: rotate(0deg);
+  }
+  .halftone-hero {
+    background-size: 14px 14px, 10px 10px;
+  }
+  .btn-primary {
+    clip-path: none;
+    padding: 0.65rem 1.1rem;
+  }
+}
